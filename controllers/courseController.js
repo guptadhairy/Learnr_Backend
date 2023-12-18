@@ -32,5 +32,19 @@ export const createcourse = catchAsyncError(async(req, res, next)=>{
         success: true,
         message: "Course created successfully . You can add lectures now."
     });
-})
+});
+
+export const getCourseLectures = catchAsyncError(async (req,res, next) =>{
+    const course = await Course.findById(req.params.id);
+
+    if(!course) return next(new ErrorHandler("Course Not Found", 404));
+
+    course.views +=1;
+    await course.save();
+
+    res.status(200).json({
+        success: true,
+        lectures: course.lectures,
+    });
+});
 
