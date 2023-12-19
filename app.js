@@ -15,12 +15,16 @@ app.use(express.urlencoded({
 })
 );
 app.use(cookieParser());
+
 //importing and using routes
+
 import course from "./routes/courseRoutes.js"
 import user from "./routes/userRoutes.js"
+import payment from "./routes/paymentRoutes.js";
 
 app.use("/api/v1", course);
 app.use("/api/v1", user);
+app.use("/api/v1", payment);
 export default app;
 
 app.use(ErrorMiddleware);
