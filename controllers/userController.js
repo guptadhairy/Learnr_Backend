@@ -5,6 +5,7 @@ import ErrorHandler from "../utils/errorHandler.js";
 import { sendEmail } from "../utils/sendEmail.js";
 import { sendToken } from "../utils/sendToken.js";
 import crypto from "crypto";
+import { Stats } from "../models/Stats.js";
 
 export const register = catchAsyncError(async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -44,7 +45,7 @@ export const logout = catchAsyncError(async (req, res, next) => {
     res.status(200).cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
-        // secure: true,
+        secure: true,
         sameSite: "none",
     }).json({
         success: true,
@@ -236,11 +237,38 @@ export const deleteMyProfile = catchAsyncError(async (req,res,next) =>{
     res.status(200).cookie("token", null, {
         expires: new Date(Date.now()),
         httpOnly: true,
-        // secure: true,
+        secure: true,
         sameSite: "none",
 
     }).json({
         success: true,
         message: "User removed successfully",
     });
+});
+
+// User.watch().on("change", async () => {
+//     const stats = await Stats.find({}).sort({createdAt: "desc"}).limit(1);
+
+//     const subscription = await User.find({"subscription.status": "active"});
+//     stats[0].users = await User.countDocuments();
+//     stats[0].subscription = subscription.length;
+//     stats[0].createdAt = new Date(Date.now());
+
+//     await stats[0].save();
+// })
+
+User.watch().on("change", async () => {
+    let stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
+
+    if (stats.length === 0) {
+        // If Stats document doesn't exist, create a new one
+        stats = [new Stats()];
+    }
+
+    const subscription = await User.find({ "subscription.status": "active" });
+    stats[0].users = await User.countDocuments();
+    stats[0].subscription = subscription.length;
+    stats[0].createdAt = new Date(Date.now());
+
+    await stats[0].save();
 });
